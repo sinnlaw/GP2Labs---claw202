@@ -10,6 +10,7 @@
 bool running = true;
 
 float objectA_X = 0.0;
+float yRotation = 0.0f;
 
 //Pointer to our SDL Windows
 //SDL_GLContext
@@ -22,24 +23,64 @@ const int WINDOW_WIDTH = 640;
 const int WINDOW_HEIGHT = 480;
 
 GLuint triangleVBO;
+GLuint triangleEBO;
 
 //3D tranigle Data
-Vertex triangleData[] = { { 0.0f, 1.0f, 0.0f, //x,y,z
-							1.0f, 0.0f, 0.0f, 1.0f }, //r,g,b,a
+Vertex triangleData[] = {
+	//Front
+	{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f }, //Top Left
+	{ -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f },//Bottom Left
+	{ 0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
+	{ 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f },  //Top Right
+	{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f }, //Top Left
+	{ 0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
+	//Back
+	{ -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f }, //Top Left
+	{ -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f },//Bottom Left
+	{ 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
+	{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f },  //Top Right
+	{ -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f }, //Top Left
+	{ 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
+};
 
-							{ -1.0f, -1.0f, 0.0f, //x,y,z
-							0.0f, 1.0f, 0.0f, 1.0f }, //r,g,b,a
+GLuint indices[]{
+		//font
+		0, 1, 2, 0, 3, 2,
+		//left
+		4, 5, 1, 4, 1, 0,
+		//right
+		3, 7, 2, 7, 6, 2,
+		//bottom
+		1, 5, 2, 6, 2, 1,
+		//top
+		5, 0, 7, 5, 7, 3,
+		//back
+		4, 5, 6, 5, 7, 6
+};
 
-							{ 1.0f, -1.0f, 0.0f, //x,y,z
-							0.0f, 0.0f, 1.0f, 1.0f } }; //r,g,b,a
+void keyPressed(unsigned char key, int x, int y)
+{
+	if (key == 'a')
+	{
+		yRotation += 100;
+	}
+}
 
-void initGeometry(){
+void initGeometry()
+{
 	//create buffer
 	glGenBuffers(1, &triangleVBO);
 	//make the new vbo active
 	glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
 	//copy vertex data to vbo
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleData), triangleData, GL_STATIC_DRAW);
+
+	//create buffer
+	glGenBuffers(1, &triangleEBO);
+	//Make the EBO active
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangleEBO);
+	//Copy Index data to the EBO
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 }
 
 //Function to draw
@@ -53,20 +94,15 @@ void render()
 
 	//make the new vbo active. repeat here as a sanity check
 	glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangleEBO);
 	//Establish its 3 coordinates per vertex with zero stride(space between elements)
 	//in array and contain floating point numbers
 	glVertexPointer(3, GL_FLOAT, sizeof(Vertex), NULL);
+	//The last parameter basiclly says that the colours start 3 float into each element of the array
 	glColorPointer(4, GL_FLOAT, sizeof(Vertex), (void**)(3 * sizeof(float)));
 	//Establish array contains vertices (not normals, colours, texture coords etc)
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-
-	//Switch to ModelView
-	glMatrixMode(GL_MODELVIEW);
-	//Reset using the Indentity Matrix
-	glLoadIdentity();
-	//Translate to -5.0f on z-axis
-	glTranslatef(0.0f, 0.0f, -5.0f);
 
 	//swith to modelview
 	glMatrixMode(GL_MODELVIEW);
@@ -75,22 +111,17 @@ void render()
 
 	//reset using the indenity martix	
 	glLoadIdentity();
+	//3D
+	gluLookAt(0.0, 0.0, 0.0, 0.0, 0.0, -1.0f, 0.0f, 1.0, 0.0);
 	//translate
 	glTranslatef(0.0f, 0.0f, -6.0f);
+	//Rotate
+	glRotatef(yRotation, 0.0f, 1.0f, 0.0f);
 	//draw the triangle 
-	glDrawArrays(GL_TRIANGLES, 0, sizeof(triangleData) / (3 * sizeof(Vertex)));
-
-	//triangle two
-
-	//reset using the indenity martix	
-	glLoadIdentity();
-	//translate
-	glTranslatef(-2.0f, 0.0f, -6.0f);
-	//draw the triangle 
-	glDrawArrays(GL_TRIANGLES, 0, sizeof(triangleData) / (3 * sizeof(Vertex)));
+	glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
 
-	//Begin drawing triangles
+//Begin drawing triangles
 //	glBegin(GL_TRIANGLES);
 //		glColor3f(1.0f, 0.0f, 0.0f);	//Colour of the vertices
 //		glVertex3f(objectA_X, 0.5f, 0.0f);	//Top
@@ -119,6 +150,7 @@ void update()
 //Clean Up function
 void CleanUp(){
 	SDL_DestroyWindow(window);
+	glDeleteBuffers(1, &triangleEBO);
 	glDeleteBuffers(1, &triangleVBO);
 	SDL_GL_DeleteContext(glcontext);
 	SDL_Quit();

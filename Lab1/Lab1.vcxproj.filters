@@ -37,10 +37,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="simpleVS.glsl">
+    <None Include="assets\shaders\simpleFS.glsl">
       <Filter>assets\shaders</Filter>
     </None>
-    <None Include="simpleFS.glsl">
+    <None Include="assets\shaders\simpleVS.glsl">
       <Filter>assets\shaders</Filter>
     </None>
   </ItemGroup>

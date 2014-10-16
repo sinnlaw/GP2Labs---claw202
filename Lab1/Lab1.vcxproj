@@ -87,8 +87,8 @@
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="simpleFS.glsl" />
-    <None Include="simpleVS.glsl" />
+    <None Include="assets\shaders\simpleFS.glsl" />
+    <None Include="assets\shaders\simpleVS.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

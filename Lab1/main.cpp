@@ -4,6 +4,7 @@
 #include <GL\glew.h>
 #include <SDL_opengl.h>
 #include <gl\GLU.h>
+#include <SDL_image.h>
 #include "Vertex.h"
 #include "Shader.h"
 
@@ -49,24 +50,7 @@ mat4 worldMatrix;
 
 //3D tranigle Data
 Vertex triangleData[] = {
-	//Front
-	-0.5f, 0.5f, 0.5f,// Top Left
-
-	-0.5f, -0.5f, 0.5f,// Bottom Left
-
-	0.5f, -0.5f, 0.5f, //Bottom Right
-
-	0.5f, 0.5f, 0.5f,// Top Right
-
-
-	//back
-	-0.5f, 0.5f, -0.5f,// Top Left
-
-	-0.5f, -0.5f, -0.5f,// Bottom Left
-
-	0.5f, -0.5f, -0.5f, //Bottom Right
-
-	0.5f, 0.5f, -0.5f,// Top Right
+	{vec3(-0.5f, 0.5f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f)}
 };
 
 GLuint indices[] = {
@@ -139,7 +123,9 @@ void render()
 
 	//Tell	the	shader	that	0	is	the	position	element
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void**)sizeof(Vertex));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)sizeof(vec3));
 
 	//draw the triangle 
 	glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
@@ -173,6 +159,13 @@ void initOpenGL()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+	int	imageInitFlags = IMG_INIT_JPG | IMG_INIT_PNG;
+	int	returnInitFlags = IMG_Init(imageInitFlags);
+	if (((returnInitFlags)&	(imageInitFlags)) != imageInitFlags)	{
+		std::cout << "ERROR	SDL_Image Init " << IMG_GetError() << std::endl;
+		//	handle	error
+	}
 
 	//Create OpenGL Context
 	glcontext = SDL_GL_CreateContext(window);
@@ -254,11 +247,11 @@ void InitWindow(int width, int height, bool fullscreen)
 void createShader()
 {
 	GLuint vertexShaderProgram = 0;
-		std::string vsPath = ASSET_PATH + SHADER_PATH + "/simpleVS.glsl";
+		std::string vsPath = ASSET_PATH + SHADER_PATH + "/textureVS.glsl";
 		vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
 
 	GLuint fragmentShaderProgram = 0;
-		std::string fsPath = ASSET_PATH + SHADER_PATH + "/simpleFS.glsl";
+		std::string fsPath = ASSET_PATH + SHADER_PATH + "/textureFS.glsl";
 		fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
 
 	shaderProgram =	glCreateProgram();

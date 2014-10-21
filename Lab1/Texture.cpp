@@ -1,12 +1,13 @@
-#include	"Texture.h"
+#include "Texture.h"
 
 GLuint loadTextureFromFile(const std::string& filename)
 {
 	GLuint textureID = 0;
 
+
 	SDL_Surface	*imageSurface = IMG_Load(filename.c_str());
 	if (!imageSurface){
-		std::cout << "Can'	Load	image	" << filename << "	" << IMG_GetError();
+		std::cout << "Can't Load image" << filename << "	" << IMG_GetError();
 		return	textureID;
 	}
 
@@ -35,7 +36,7 @@ GLuint loadTextureFromFile(const std::string& filename)
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, textureFormat, imageSurface->w, imageSurface->h, 0, textureFormat,
-				 GL_UNSIGNED_BYTE, imageSurface->pixels);
+		GL_UNSIGNED_BYTE, imageSurface->pixels);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

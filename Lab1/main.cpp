@@ -7,6 +7,7 @@
 #include <SDL_image.h>
 #include "Vertex.h"
 #include "Shader.h"
+#include "Texture.h"
 
 //maths	headers
 #include <glm/glm.hpp>
@@ -22,7 +23,9 @@ const std::string ASSET_PATH = "assets";
 #endif
 
 const std::string SHADER_PATH = "/shaders";
+const std::string TEXTURE_PATH = "/texture";
 
+ 
 //Golbal variables
 bool running = true;
 
@@ -38,6 +41,7 @@ SDL_GLContext glcontext = NULL;
 const int WINDOW_WIDTH = 640;
 const int WINDOW_HEIGHT = 480;
 
+GLuint texture = 0;
 GLuint triangleVBO;
 GLuint triangleEBO;
 GLuint shaderProgram = 0;
@@ -50,7 +54,16 @@ mat4 worldMatrix;
 
 //3D tranigle Data
 Vertex triangleData[] = {
-	{vec3(-0.5f, 0.5f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f)}
+		//Front
+		{ vec3(-0.5f, 0.5f, 0.5f), vec2(0.0f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) },//	Top	Left
+		{ vec3(-0.5f, -0.5f, 0.5f), vec2(0.0f, 1.0f), vec4(0.0f, 1.0f, 0.0f, 1.0f) },//	Bottom	Left
+	 	{ vec3(0.5f, -0.5f, 0.5f), vec2(1.0f, 1.0f), vec4(0.0f, 0.0f, 1.0f, 1.0f) },	//Bottom	Right
+		{ vec3(0.5f, 0.5f, 0.5f), vec2(1.0f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) },//	Top	Right
+		//Back
+		{ vec3(-0.5f, 0.5f, -0.5f), vec2(0.0f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) },//	Top	Left
+		{ vec3(-0.5f, -0.5f, -0.5f), vec2(0.0f, 1.0f), vec4(0.0f, 1.0f, 0.0f, 1.0f) },//	Bottom	Left
+		{ vec3(0.5f, -0.5f, -0.5f), vec2(1.0f, 1.0f), vec4(0.0f, 0.0f, 1.0f, 1.0f) },	//Bottom	Right
+		{ vec3(0.5f, 0.5f, -0.5f), vec2(1.0f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) }//	Top	Right
 };
 
 GLuint indices[] = {
@@ -117,6 +130,13 @@ void render()
 
 	glUseProgram(shaderProgram);
 
+	GLint texture0Location = glGetUniformLocation(shaderProgram, "texture0");
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glUniform1i(texture0Location, 0);
+
 	GLint MVPLocation = glGetUniformLocation(shaderProgram, "MVP");
 	mat4 MVP = projMatrix*viewMatrix*worldMatrix;
 	glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, glm::value_ptr(MVP));
@@ -125,7 +145,9 @@ void render()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), NULL);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void**)sizeof(vec3));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),(void**)sizeof(vec3));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),(void**)(sizeof(vec3)+sizeof(vec2)));
 
 	//draw the triangle 
 	glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
@@ -144,6 +166,7 @@ void update()
 
 //Clean Up function
 void CleanUp(){
+	glDeleteTextures(1, &texture);
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteProgram(shaderProgram);
 	SDL_DestroyWindow(window);
@@ -160,12 +183,7 @@ void initOpenGL()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-	int	imageInitFlags = IMG_INIT_JPG | IMG_INIT_PNG;
-	int	returnInitFlags = IMG_Init(imageInitFlags);
-	if (((returnInitFlags)&	(imageInitFlags)) != imageInitFlags)	{
-		std::cout << "ERROR	SDL_Image Init " << IMG_GetError() << std::endl;
-		//	handle	error
-	}
+
 
 	//Create OpenGL Context
 	glcontext = SDL_GL_CreateContext(window);
@@ -261,6 +279,14 @@ void createShader()
 		checkForLinkErrors(shaderProgram);
 
 	glBindAttribLocation(shaderProgram, 0, "vertexPosition");
+	glBindAttribLocation(shaderProgram, 1, "vertexTexCoords");
+	glBindAttribLocation(shaderProgram, 2, "vertexColour");
+}
+
+void createTexture()
+{
+	std::string	texturePath = ASSET_PATH + TEXTURE_PATH + "/texture.png";
+	texture = loadTextureFromFile(texturePath);
 }
 
 //Main Method - Entry Point
@@ -272,6 +298,13 @@ int main(int argc, char* arg[]){
 		return -1;
 	}
 
+	int	imageInitFlags = IMG_INIT_JPG | IMG_INIT_PNG;
+	int	returnInitFlags = IMG_Init(imageInitFlags);
+	if (((returnInitFlags)&	(imageInitFlags)) != imageInitFlags)	{
+		std::cout << "ERROR	SDL_Image Init " << IMG_GetError() << std::endl;
+		//	handle	error
+	}
+
 	InitWindow(WINDOW_HEIGHT, WINDOW_HEIGHT, false);
 	//Call out InitOpenGL Function
 	initOpenGL();
@@ -279,6 +312,7 @@ int main(int argc, char* arg[]){
 	//Set our viewport
 	setViewport(WINDOW_WIDTH, WINDOW_HEIGHT);
 
+	createTexture();
 	update();
 	render();
 	createShader();

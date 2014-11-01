@@ -312,10 +312,9 @@ int main(int argc, char* arg[]){
 	//Set our viewport
 	setViewport(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-	createTexture();
-	update();
-	render();
 	createShader();
+	createTexture();
+
 
 	//Game loop
 	while (running)
@@ -329,6 +328,9 @@ int main(int argc, char* arg[]){
 		{
 
 		}
+		update();
+		render();
+
 	}
 
 	CleanUp();

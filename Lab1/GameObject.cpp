@@ -1,7 +1,16 @@
 #include "GameObject.h"
+#include "Component.h"
+#include "Transform.h"
+#include "Mesh.h"
+#include "Material.h"
+#include "Camera.h"
 
 GameObject::GameObject()
 {
+	m_Transform = NULL;
+	m_Mesh = NULL;
+	m_Material = NULL;
+	m_Camera = NULL;
 	m_Name = "GameObject";
 }
 
@@ -61,6 +70,7 @@ void GameObject::destroy()
 
 void GameObject::addComponent(Component * component)
 {
+	component->setParent(this);
 	m_Components.push_back(component);
 }
 
@@ -73,3 +83,13 @@ void GameObject::setName(const std::string& name)
 {
 	m_Name = name;
 }
+
+void GameObject::setTransform(Transform *transform)
+{
+	m_Transform = transform;
+	addComponent(transform);
+}
+void GameObject::setMesh(Mesh *mesh){	m_Mesh = mesh;	addComponent(mesh);}void GameObject::setMaterial(Material *marterial){	m_Material = marterial;	addComponent(marterial);}void GameObject::setCamera(Camera *camera){	m_Camera = camera;	addComponent(camera);}Transform * GameObject::getTransform()
+{
+	return m_Transform;
+}Mesh *GameObject::getMesh(){	return m_Mesh;}Material *GameObject::getMaterial(){	return m_Material;}Camera *GameObject::getCamera(){	return m_Camera;}

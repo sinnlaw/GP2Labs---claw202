@@ -1,13 +1,14 @@
 #ifndef Transform_h
 #define Transform_h
 
-#include <glm/glm.hpp>
 #include "Component.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 using glm::vec3;
 using glm::mat4;
 
-class Transform
+class Transform:public Component
 {
 public:
 	Transform();
@@ -15,16 +16,14 @@ public:
 
 	void update();
 
-	vec3 setPosition(float x, float y, float z);
-	vec3 getPosition();
+	void setPosition(float x, float y, float z);
+	void setScale(float x, float y, float z);
+	void setRotation(float x, float y, float z);
 
-	vec3 setScale(float x, float y, float z);
-	vec3 getScale();
-
-	vec3 setRotation(float x, float y, float z);
-	vec3 getRotation();
-
-	mat4 getModel();	
+	vec3& getPosition();
+	vec3& getScale();
+	vec3& getRotation();
+	mat4& getModel();	
 
 private:
 

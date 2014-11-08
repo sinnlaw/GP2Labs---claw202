@@ -19,6 +19,9 @@
     <Filter Include="assets\shaders">
       <UniqueIdentifier>{d451c7b1-8c53-4b19-9692-e104d079d138}</UniqueIdentifier>
     </Filter>
+    <Filter Include="assets\models">
+      <UniqueIdentifier>{4df74ef8-8b4e-4931-a538-19a79a0b8cca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -46,6 +49,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FBXLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,12 +83,24 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FBXLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\textureFS.glsl">
       <Filter>assets\shaders</Filter>
     </None>
     <None Include="assets\shaders\textureVS.glsl">
+      <Filter>assets\shaders</Filter>
+    </None>
+    <None Include="assets\models\armoredrecon.fbx">
+      <Filter>assets\models</Filter>
+    </None>
+    <None Include="assets\shaders\simpleFS.glsl">
+      <Filter>assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\simpleVS.glsl">
       <Filter>assets\shaders</Filter>
     </None>
   </ItemGroup>

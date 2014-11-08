@@ -16,6 +16,13 @@ void Material::destory()
 	glDeleteProgram(m_ShaderProgram);
 }
 
+void Material::bind()
+{
+
+	glUseProgram(m_ShaderProgram);
+
+}
+
 bool Material::loadShader(const std::string vertexFileName, const std::string fragmentFileName)
 {
 	GLuint vertexShaderProgram = 0;
@@ -35,17 +42,11 @@ bool Material::loadShader(const std::string vertexFileName, const std::string fr
 	glDeleteShader(fragmentShaderProgram);
 
 	glBindAttribLocation(m_ShaderProgram, 0, "vertexPosition");
-	glBindAttribLocation(m_ShaderProgram, 1, "vertexTexCoords");
-	glBindAttribLocation(m_ShaderProgram, 2, "vertexColour");
+	glBindAttribLocation(m_ShaderProgram, 1, "vertexNormals");
+	glBindAttribLocation(m_ShaderProgram, 2, "vertexTexCoords");
+	glBindAttribLocation(m_ShaderProgram, 3, "vertexColour");
 
 	return true;
-}
-
-void Material::bind()
-{
-
-	glUseProgram(m_ShaderProgram);
-
 }
 
 GLint Material::getUniformLocation(const std::string& name)

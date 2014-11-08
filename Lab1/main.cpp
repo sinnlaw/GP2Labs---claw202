@@ -17,6 +17,8 @@
 #include "Material.h"
 #include "Camera.h"
 #include "Component.h"
+#include "FBXLoader.h"
+
 #include <glm/glm.hpp>
 using glm::mat4;
 using glm::vec3;
@@ -42,7 +44,7 @@ const std::string ASSET_PATH = "assets";
 
 const std::string SHADER_PATH = "/shaders";
 const std::string TEXTURE_PATH = "/texture";
-
+const std::string MODEL_PATH = "/models";
  
 //Golbal variables
 bool running = true;
@@ -68,19 +70,20 @@ mat4 viewMatrix;
 mat4 projMatrix;
 mat4 worldMatrix;
 
-//3D tranigle Data
 Vertex triangleData[] = {
-		//Front
-		{ vec3(-0.5f, 0.5f, 0.5f), vec2(0.0f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) },//	Top	Left
-		{ vec3(-0.5f, -0.5f, 0.5f), vec2(0.0f, 1.0f), vec4(0.0f, 1.0f, 0.0f, 1.0f) },//	Bottom	Left
-	 	{ vec3(0.5f, -0.5f, 0.5f), vec2(1.0f, 1.0f), vec4(0.0f, 0.0f, 1.0f, 1.0f) },	//Bottom	Right
-		{ vec3(0.5f, 0.5f, 0.5f), vec2(1.0f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) },//	Top	Right
-		//Back
-		{ vec3(-0.5f, 0.5f, -0.5f), vec2(0.0f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) },//	Top	Left
-		{ vec3(-0.5f, -0.5f, -0.5f), vec2(0.0f, 1.0f), vec4(0.0f, 1.0f, 0.0f, 1.0f) },//	Bottom	Left
-		{ vec3(0.5f, -0.5f, -0.5f), vec2(1.0f, 1.0f), vec4(0.0f, 0.0f, 1.0f, 1.0f) },	//Bottom	Right
-		{ vec3(0.5f, 0.5f, -0.5f), vec2(1.0f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) }//	Top	Right
+	{ vec3(-0.5f, 0.5f, 0.5f), vec3(0.25f, 0.25f, 0.5f), vec2(0.0f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) },// Top Left
+	{ vec3(-0.5f, -0.5f, 0.5f), vec3(0.25f, 0.25f, 0.5f), vec2(0.0f, 1.0f), vec4(0.0f, 1.0f, 0.0f, 1.0f) },// Bottom Left
+	{ vec3(0.5f, -0.5f, 0.5f), vec3(0.25f, -0.25f, 0.5f), vec2(1.0f, 1.0f), vec4(0.0f, 0.0f, 1.0f, 1.0f) }, //Bottom Right
+	{ vec3(0.5f, 0.5f, 0.5f), vec3(0.25f, -0.25f, 0.5f), vec2(1.0f, 0.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) },// Top Right
+
+
+	//back
+	{ vec3(-0.5f, 0.5f, -0.5f), vec3(0.25f, 0.25f, -0.5f), vec2(0.0f, 0.0f), vec4(0.0f, 0.0f, 1.0f, 1.0f) },// Top Left
+	{ vec3(-0.5f, -0.5f, -0.5f), vec3(0.25f, 0.25f, -0.5f), vec2(0.0f, 1.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) },// Bottom Left
+	{ vec3(0.5f, -0.5f, -0.5f), vec3(0.25f, -0.25f, -0.5f), vec2(1.0f, 1.0f), vec4(0.0f, 0.0f, 0.0f, 1.0f) }, //Bottom Right
+	{ vec3(0.5f, 0.5f, -0.5f), vec3(0.25f, -0.25f, -0.5f), vec2(1.0f, 0.0f), vec4(0.0f, 1.0f, 0.0f, 1.0f) }// Top Right
 };
+
 
 GLuint indices[] = {
 	//front
@@ -129,6 +132,40 @@ void initGeometry()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 }
 
+void renderGameObject(GameObject *pObject)
+{
+	if (!pObject)
+	{
+		return;
+
+		pObject->render();
+
+		Mesh * currentMesh = pObject->getMesh();
+		Transform * currentTransform = pObject->getTransform();
+		Material * currentMaterial = pObject->getMaterial();
+
+		if (currentMesh && currentMaterial && currentTransform)
+		{
+			currentMesh->Bind();
+			currentMaterial->bind();
+
+			GLint MVPLocation = currentMaterial->getUniformLocation("MVP");
+
+			Camera * cam = mainCamera->getCamera();
+			mat4 MVP = cam->getProjection()*cam->getView()*currentTransform->getModel();
+			glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, glm::value_ptr(MVP));
+
+			glDrawElements(GL_TRIANGLES, currentMesh->getIndexData(), GL_UNSIGNED_INT, 0);
+		}
+
+		for (int i = 0; i < pObject->getChildCount(); i++)
+		{
+			renderGameObject(pObject->getChild(i));
+		}
+
+	}
+}
+
 //Function to draw
 void render()
 {
@@ -162,25 +199,8 @@ void render()
 
 	for (auto iter = displayList.begin(); iter != displayList.end(); iter++)
 	{
-		(*iter)->render();
-
-		Mesh * currentMesh = (*iter)->getMesh();
-		Transform * currentTransform = (*iter)->getTransform();
-		Material * currentMaterial = (*iter)->getMaterial();
-
-		if (currentMesh && currentMaterial && currentTransform)
-		{
-			currentMesh->Bind();
-			currentMaterial->bind();
-
-			GLint MVPLocation = currentMaterial->getUniformLocation("MVP");
-
-			Camera * cam = mainCamera->getCamera();
-			mat4 MVP = cam->getProjection()*cam->getView()*currentTransform->getModel();
-			glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, glm::value_ptr(MVP));
-
-			glDrawElements(GL_TRIANGLES, currentMesh->getIndexData(), GL_UNSIGNED_INT, 0);
-		}
+	
+		renderGameObject((*iter));
 
 	}
 
@@ -198,7 +218,7 @@ void update()
 	//alternative sytanx
 	for (auto iter = displayList.begin(); iter != displayList.end(); iter++)
 	{
-		(*iter)->update();
+		renderGameObject((*iter));
 	}
 
 }
@@ -206,12 +226,16 @@ void update()
 void initialise()
 {
 	mainCamera = new GameObject();
+	mainCamera->setName("MainCamera");
 
 	Transform *t = new Transform();
-	t->setPosition(0.0f, 0.0f, 2.0f);
+	t->setPosition(0.0f, 0.0f, 10.0f);
 	mainCamera->setTransform(t);
 
 	Camera * c = new Camera();
+	c->setFOV(45.0f);
+	c->setNearClip(0.1f);
+	c->setFarClip(1000.0f);
 
 	//set everthing
 	mainCamera->setCamera(c);
@@ -219,14 +243,13 @@ void initialise()
 
 	GameObject * cube = new GameObject();
 	cube->setName("Cube");
-
 	Transform *transform = new Transform();
-	transform->setPosition(0.0f, 0.0f, 2.0f);
+	transform->setPosition(0.0f, 0.0f, 0.0f);
 	cube->setTransform(transform);
 
 	Material * material = new Material();
-	std::string vsPath = ASSET_PATH + SHADER_PATH + "/textureVS.glsl";
-	std::string fsPath = ASSET_PATH + SHADER_PATH + "/texturerFS.glsl";
+	std::string vsPath = ASSET_PATH + SHADER_PATH + "/simpleVS.glsl";
+	std::string fsPath = ASSET_PATH + SHADER_PATH + "/simpleFS.glsl";
 	material->loadShader(vsPath, fsPath);
 	cube->setMaterial(material);
 
@@ -240,10 +263,24 @@ void initialise()
 	for (auto iter = displayList.begin(); iter != displayList.end(); iter++)
 	{
 		(*iter)->init();
-	}
+	} 
 
 	mesh->copyVertexData(8, sizeof(Vertex), (void**)triangleData);
 	mesh->copyIndexData(36, sizeof(int), (void**)indices);
+
+	std::string modelPath = ASSET_PATH + MODEL_PATH + "/armoredrecon.fbx";
+	GameObject * go = loadFBXFromFile(modelPath);
+	for (int i = 0; i < go->getChildCount(); i++)
+	{
+		Material * material = new Material();
+		material->init();
+		std::string vsPath = ASSET_PATH + SHADER_PATH + "/simpleVS.glsl";
+		std::string fsPath = ASSET_PATH + SHADER_PATH + "/simpleFS.glsl";
+		material->loadShader(vsPath, fsPath);
+		go->getChild(i)->setMaterial(material);
+	}
+	displayList.push_back(go);
+
 }
 
 //Clean Up function
@@ -361,26 +398,26 @@ void InitWindow(int width, int height, bool fullscreen)
 		);
 }
 
-void createShader()
-{
-	GLuint vertexShaderProgram = 0;
-		std::string vsPath = ASSET_PATH + SHADER_PATH + "/textureVS.glsl";
-		vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);
-
-	GLuint fragmentShaderProgram = 0;
-		std::string fsPath = ASSET_PATH + SHADER_PATH + "/textureFS.glsl";
-		fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);
-
-	shaderProgram =	glCreateProgram();
-		glAttachShader(shaderProgram, vertexShaderProgram);
-		glAttachShader(shaderProgram, fragmentShaderProgram);
-		glLinkProgram(shaderProgram);
-		checkForLinkErrors(shaderProgram);
-
-	glBindAttribLocation(shaderProgram, 0, "vertexPosition");
-	glBindAttribLocation(shaderProgram, 1, "vertexTexCoords");
-	glBindAttribLocation(shaderProgram, 2, "vertexColour");
-}
+//void createShader()
+//{
+//	GLuint vertexShaderProgram = 0;
+//		std::string vsPath = ASSET_PATH + SHADER_PATH + "/textureVS.glsl";
+//		vertexShaderProgram = loadShaderFromFile(vsPath, VERTEX_SHADER);/
+//
+//	GLuint fragmentShaderProgram = 0;
+//		std::string fsPath = ASSET_PATH + SHADER_PATH + "/textureFS.glsl";
+//		fragmentShaderProgram = loadShaderFromFile(fsPath, FRAGMENT_SHADER);/
+//
+//	shaderProgram =	glCreateProgram();
+//		glAttachShader(shaderProgram, vertexShaderProgram);
+//		glAttachShader(shaderProgram, fragmentShaderProgram);
+//		glLinkProgram(shaderProgram);
+//		checkForLinkErrors(shaderProgram);
+//
+//	glBindAttribLocation(shaderProgram, 0, "vertexPosition");
+//	glBindAttribLocation(shaderProgram, 1, "vertexTexCoords");
+//	glBindAttribLocation(shaderProgram, 2, "vertexColour");
+//}
 
 void createTexture()
 {

@@ -41,6 +41,9 @@ GameObject * mainCamera;
 #include "Shader.h"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 9382281... Lab3 16/10/2014
+=======
 >>>>>>> parent of 9382281... Lab3 16/10/2014
 =======
 >>>>>>> parent of 9382281... Lab3 16/10/2014
@@ -49,6 +52,7 @@ GameObject * mainCamera;
 using glm::mat4;
 using glm::vec3;
 #include <glm/gtc/matrix_transform.hpp>
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 #include <glm/gtc/type_ptr.hpp>
@@ -496,6 +500,7 @@ const std::string ASSET_PATH = "../assets";
 const std::string ASSET_PATH = "assets";
 #endif
 =======
+=======
 
 #ifdef _DEBUG && WIN32
 const std::string ASSET_PATH = "../assets";
@@ -565,6 +570,82 @@ GLuint indices[]{
 
 void keyPressed(unsigned char key, int x, int y)
 {
+	if (key == 'a')
+	{
+		yRotation += 100;
+	}
+}
+>>>>>>> parent of 9382281... Lab3 16/10/2014
+
+#ifdef _DEBUG && WIN32
+const std::string ASSET_PATH = "../assets";
+#else
+const std::string ASSET_PATH = "assets";
+#endif
+
+const std::string SHADER_PAT = "/shaders";
+
+//Golbal variables
+bool running = true;
+
+float objectA_X = 0.0;
+float yRotation = 30.0f;
+
+//Pointer to our SDL Windows
+//SDL_GLContext
+SDL_Window * window;
+SDL_Event event;
+SDL_GLContext glcontext = NULL;
+
+//Constants to control window creation
+const int WINDOW_WIDTH = 640;
+const int WINDOW_HEIGHT = 480;
+
+GLuint shaderProgram = 0;
+GLuint triangleVBO;
+GLuint triangleEBO;
+
+//matrices
+mat4	viewMatrix;
+mat4	projMatrix;
+mat4	worldMatrix;
+
+//3D tranigle Data
+Vertex triangleData[] = {
+	//Front
+	{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f }, //Top Left
+	{ -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f },//Bottom Left
+	{ 0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
+	{ 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f },  //Top Right
+	{ -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f }, //Top Left
+	{ 0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
+	//Back
+	{ -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f }, //Top Left
+	{ -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f },//Bottom Left
+	{ 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
+	{ 0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f },  //Top Right
+	{ -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f }, //Top Left
+	{ 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f }, //Bottom Right
+};
+
+GLuint indices[]{
+		//font
+		0, 1, 2, 0, 3, 2,
+		//left
+		4, 5, 1, 4, 1, 0,
+		//right
+		3, 7, 2, 7, 6, 2,
+		//bottom
+		1, 5, 2, 6, 2, 1,
+		//top
+		5, 0, 7, 5, 7, 3,
+		//back
+		4, 5, 6, 5, 7, 6
+};
+
+void keyPressed(unsigned char key, int x, int y)
+{
+<<<<<<< HEAD
 	if (key == 'a')
 	{
 		yRotation += 100;
@@ -643,6 +724,8 @@ void keyPressed(unsigned char key, int x, int y)
 
 void initGeometry()
 {
+=======
+>>>>>>> parent of 9382281... Lab3 16/10/2014
 =======
 >>>>>>> parent of 9382281... Lab3 16/10/2014
 	//create buffer

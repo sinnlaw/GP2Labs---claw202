@@ -49,6 +49,9 @@ GLuint loadShaderFromFile(const std::string&filename, SHADER_TYPE shaderType)
 
 }
 
+
+bool checkForLinkErrors(GLuint program){	GLint isLinked = 0;	glGetProgramiv(program, GL_LINK_STATUS, &isLinked);	if (isLinked == GL_FALSE)	{		GLint maxLength = 0;		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);		//The maxLength includes the NULL character		std::string infoLog;		glGetShaderInfoLog(program, maxLength, &maxLength, &infoLog[0]);		std::cout << "Shader	not linked" << infoLog << std::endl;		//We don't need the shader anymore.		glDeleteProgram(program);		return true;	}	return false;}
+
 bool checkForCompilerErrors(GLuint shaderProgram)
 {
 	GLint isCompiled = 0;
@@ -71,29 +74,4 @@ bool checkForCompilerErrors(GLuint shaderProgram)
 
 	}
 	return false;
-}
-
-bool checkForLinkErrors(GLuint program)
-{
-	GLint isLinked = 0;
-	glGetProgramiv(program, GL_LINK_STATUS, &isLinked);
-
-	if (isLinked == GL_FALSE)
-	{
-		GLint maxLength = 0;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
-
-		//The maxLength includes the NULL character
-		std::string infoLog;
-		glGetShaderInfoLog(program, maxLength, &maxLength, &infoLog[0]);
-
-		std::cout << "Shader not linked" << infoLog << std::endl;
-
-		//We don't need the shader anymore.
-		glDeleteProgram(program);
-		return true;
-	}
-
-	return false;
-
 }

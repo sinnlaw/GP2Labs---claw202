@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <None Include="assets\shaders\textureFS.glsl">
       <Filter>assets\shaders</Filter>
     </None>
@@ -99,6 +100,9 @@
       <Filter>assets\models</Filter>
     </None>
     <None Include="assets\shaders\simpleFS.glsl">
+=======
+    <None Include="simpleVS.glsl">
+>>>>>>> parent of 9382281... Lab3 16/10/2014
 =======
     <None Include="simpleVS.glsl">
 >>>>>>> parent of 9382281... Lab3 16/10/2014
